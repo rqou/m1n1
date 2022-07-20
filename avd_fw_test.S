@@ -151,14 +151,20 @@ _start:
 
 
 // hax IPC:
+//  +0x00 = status
 //  +0x10 = flag
 //  +0x14 = addr
 //  +0x18 = WnR
 //  +0x1c = val
+//  +0xf0 = boot count
 start:
     mov r0, #0x10000000
     movs r1, #0x55
     str r1, [r0]
+
+    ldr r1, [r0, #0xf0]
+    adds r1, #1
+    str r1, [r0, #0xf0]
 
 1:
     ldr r1, [r0, #0x10]

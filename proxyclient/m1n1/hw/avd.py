@@ -29,20 +29,61 @@ class AVDPIODMARegs(RegMap):
     INIT_AVD_WRAP_THING                 = 0x24, Register32
 
 
+class R_MBOX_STATUS(Register32):
+    # This one bit can be read/written
+    ENABLE      = 0
+    WPTR        = 10, 8
+    RPTR        = 14, 12
+    FULL        = 16
+    EMPTY       = 17
+    # Not sure how to clear these bits?
+    OVERFLOW    = 18
+    UNDERFLOW   = 19
+
+
 class AVDCM3CtrlRegs(RegMap):
-    # bit[3:1] unk
-    # bit0 = run
+    # seems to be read-only
+    REG_0x0                             = 0x00, Register32
+    # seems to be read-only
+    REG_0x4                             = 0x04, Register32
+    # bit3 = ???
+    # bit2 = ??? hold cpu in reset
+    # bit1 = ??? also holds cpu in reset, but differently????
+    # bit0 = run???? obviously not, the CPU runs even if i clear it
     RUN_CONTROL                         = 0x08, Register32
-
+    # seems to be read-only
+    REG_0xc                             = 0x0c, Register32
+    # 0x3fff
     INT_ENABLE_THING0                   = 0x10, Register32
+    # R/W, 32 bits
+    REG_0x14                            = 0x14, Register32
+    REG_0x18                            = 0x18, Register32
+    REG_0x1c                            = 0x1c, Register32
+    REG_0x20                            = 0x20, Register32
+    REG_0x24                            = 0x24, Register32
+    REG_0x28                            = 0x28, Register32
 
+    # 0x3ff
     INT_ENABLE_THING1                   = 0x48, Register32
 
-    MAILBOX0_STATUS                     = 0x50, Register32
-    MAILBOX0_DATA                       = 0x54, Register32
+    MAILBOX0_STATUS                     = 0x50, R_MBOX_STATUS
+    MAILBOX0_SUBMIT                     = 0x54, Register32
+    MAILBOX0_RETRIEVE                   = 0x58, Register32
+    MAILBOX1_STATUS                     = 0x5c, R_MBOX_STATUS
+    MAILBOX1_SUBMIT                     = 0x60, Register32
+    MAILBOX1_RETRIEVE                   = 0x64, Register32
+    MAILBOX2_STATUS                     = 0x68, R_MBOX_STATUS
+    MAILBOX2_SUBMIT                     = 0x6c, Register32
+    MAILBOX2_RETRIEVE                   = 0x70, Register32
+    MAILBOX3_STATUS                     = 0x74, R_MBOX_STATUS
+    MAILBOX3_SUBMIT                     = 0x78, Register32
+    MAILBOX3_RETRIEVE                   = 0x7c, Register32
 
-    MAILBOX1_STATUS                     = 0x68, Register32
-    MAILBOX1_DATA                       = 0x6c, Register32
+    # Used to communicate boot completion between fw<->host
+    FLAGS0_SET                          = 0x90, Register32
+    FLAGS1_SET                          = 0x94, Register32
+    FLAGS0_CLR                          = 0x98, Register32
+    FLAGS1_CLR                          = 0x9c, Register32
 
 
 class AVDConfigRegs(RegMap):

@@ -202,6 +202,7 @@ p.write32(thing2_base + 0x0, 0x1fff)
 # dart.invalidate_streams()
 
 load(cm3_code_base, test_fw)
+p.write32(cm3_data_base + 0xf0, 0)
 
 p.write32(cm3_ctrl_base + 0x08, 0xe)
 p.write32(cm3_ctrl_base + 0x10, 0)
@@ -433,3 +434,8 @@ def m3_write(addr, val):
             dbg = p.read32(cm3_data_base + 0x00)
             print(f"dbg {dbg:08X}")
             return
+
+# notes on M3-side hardware
+# 0x00000000    sz 0x10000      code ram (writable)
+# 0x10000000    sz 0x10000      data ram
+# 0x50010000    sz 0x4000       the m3 control block registers?
