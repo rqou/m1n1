@@ -29,8 +29,7 @@ class AVDPIODMARegs(RegMap):
     INIT_AVD_WRAP_THING                 = 0x24, Register32
 
 
-class R_ALL_MBOX_STATUS(Register32):
-    # Write 1 to clear
+class R_CM3_IRQ(Register32):
     MBOX0_EMPTY     = 0
     MBOX0_NOT_EMPTY = 1
     MBOX1_EMPTY     = 2
@@ -39,6 +38,31 @@ class R_ALL_MBOX_STATUS(Register32):
     MBOX2_NOT_EMPTY = 5
     MBOX3_EMPTY     = 6
     MBOX3_NOT_EMPTY = 7
+    COUNTER0        = 8
+    COUNTER1        = 9
+    MBOX01_OVERFLOW = 10
+    MBOX23_OVERFLOW = 11
+    FLAGS0          = 12
+    FLAGS1          = 13
+
+
+class R_AP_IRQ(Register32):
+    # AIC line 1011
+    MBOX0_EMPTY     = 0
+    MBOX0_NOT_EMPTY = 1
+    # AIC line 1012
+    MBOX1_EMPTY     = 2
+    MBOX1_NOT_EMPTY = 3
+    # AIC line 1013
+    MBOX2_EMPTY     = 4
+    MBOX2_NOT_EMPTY = 5
+    # AIC line 1014
+    MBOX3_EMPTY     = 6
+    MBOX3_NOT_EMPTY = 7
+    # AIC line 1015
+    FLAGS0          = 8
+    # AIC line 1016
+    FLAGS1          = 9
 
 
 class R_MBOX_STATUS(Register32):
@@ -74,8 +98,7 @@ class AVDCM3CtrlRegs(RegMap):
     RUN_CONTROL                         = 0x08, Register32
     # seems to be read-only
     REG_0xc                             = 0x0c, Register32
-    # 0x3fff
-    IRQ_ENABLE_CM3                      = 0x10, Register32
+    CM3_IRQ_ENABLE                      = 0x10, R_CM3_IRQ
     # R/W, 32 bits, may also be CM3 IRQ enables?
     REG_0x14                            = 0x14, Register32
     REG_0x18                            = 0x18, Register32
@@ -84,13 +107,12 @@ class AVDCM3CtrlRegs(RegMap):
     REG_0x24                            = 0x24, Register32
     REG_0x28                            = 0x28, Register32
     # Write 1 to clear
-    IRQ_STATUS_CLR                      = 0x2c, Register32
+    CM3_IRQ_STATUS_CLR                  = 0x2c, R_CM3_IRQ
     # There may be more IRQ status regs here
 
-    # 0x3ff
-    # bit0 = "m3 inbox empty interrupt"
-    INT_ENABLE_THINGY                   = 0x48, Register32
-    ALL_MAILBOXES_STATUS                = 0x4c, R_ALL_MBOX_STATUS
+    AP_IRQ_ENABLE                       = 0x48, R_AP_IRQ
+    # Write 1 to clear
+    AP_IRQ_STATUS_CLR                   = 0x4c, R_AP_IRQ
     MAILBOX0_STATUS                     = 0x50, R_MBOX_STATUS
     MAILBOX0_SUBMIT                     = 0x54, Register32
     MAILBOX0_RETRIEVE                   = 0x58, Register32

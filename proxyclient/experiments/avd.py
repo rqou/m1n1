@@ -364,10 +364,10 @@ p.write32(cm3_data_base + 0xf0, 0)
 
 # p.write32(cm3_ctrl_base + 0x10, 0x0)
 # p.write32(cm3_ctrl_base + 0x48, 0x0)
-# p.write32(cm3_ctrl_base + 0x50, 0x1)
-# p.write32(cm3_ctrl_base + 0x68, 0x1)
-# p.write32(cm3_ctrl_base + 0x5c, 0x1)
-# p.write32(cm3_ctrl_base + 0x74, 0x1)
+p.write32(cm3_ctrl_base + 0x50, 0x1)
+p.write32(cm3_ctrl_base + 0x68, 0x1)
+p.write32(cm3_ctrl_base + 0x5c, 0x1)
+p.write32(cm3_ctrl_base + 0x74, 0x1)
 # p.write32(cm3_ctrl_base + 0x10, 0x2)
 # p.write32(cm3_ctrl_base + 0x48, 0x8)
 
@@ -469,15 +469,30 @@ def m3_clear_all_pending_irqs():
 #   IRQ 5   mbox 2 data
 #   IRQ 6   mbox 3 empty
 #   IRQ 7   mbox 3 data
-#   IRQ 8   triggered by 0x80
-#   IRQ 9   triggered by 0x88
+#   IRQ 8   counter 0
+#   IRQ 9   counter 1
 #   IRQ 10  mailbox 0/1 overflowed?
 #   IRQ 11  mailbox 2/3 overflowed?
 #   IRQ 12  flags0 has bits set
 #   IRQ 13  flags1 has bits set
 # status of mailbox interrupts shows up at 0x2c and is cleared there
 # irqs are masked in 0x10
-# not sure what 0x48 does?
 # 0x00000000    sz 0x10000      code ram (writable)
 # 0x10000000    sz 0x10000      data ram
 # 0x50010000    sz 0x4000       the m3 control block registers?
+
+# IRQs on AP
+# 1011          0x7c bit 19     mbox 0 (both empty and data)
+# 1012          0x7c bit 20     mbox 1 (both empty and data)
+# 1013          0x7c bit 21     mbox 2 (both empty and data)
+# 1014          0x7c bit 22     mbox 3 (both empty and data)
+# 1015          0x7c bit 23     flags 0
+# 1016          0x7c bit 24     flags 1
+
+# ? 1017        0x7c bit 25
+# 1018  DART    0x7c bit 26
+# ? 1019        0x7c bit 27
+# ? 1020        0x7c bit 28
+# ? 1021        0x7c bit 29
+# ? 1022        0x7c bit 30
+# ? 1023        0x7c bit 31
