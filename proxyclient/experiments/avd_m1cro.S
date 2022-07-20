@@ -169,6 +169,8 @@ start:
 
 1:
     ldr r1, [r0, #0x10]
+    cmp r1, #2
+    beq wfi_cmd
     cmp r1, #1
     bne 1b
 
@@ -190,6 +192,14 @@ start:
     str r2, [r1]
     movs r2, #0
     str r2, [r0, #0x10]
+    b 1b
+
+wfi_cmd:
+    movs r1, #0
+    str r1, [r0, #0x10]
+    wfi
+    movs r1, #0xaa
+    str r1, [r0, #0x1c]
     b 1b
 
 nmi:

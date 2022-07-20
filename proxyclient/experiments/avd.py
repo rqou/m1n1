@@ -22,15 +22,15 @@ thing2_base     = avd_base + 0x100_0000
 dart_base       = avd_base + 0x101_0000
 thing3_base     = avd_base + 0x102_0000
 
-thing4_base     = avd_base + 0x107_0000
+piodma_base     = avd_base + 0x107_0000
 cm3_code_base   = avd_base + 0x108_0000
 cm3_data_base   = avd_base + 0x109_0000
 cm3_ctrl_base   = avd_base + 0x10a_0000
 
-thing5_base     = avd_base + 0x110_0000
-thing6_base     = avd_base + 0x110_c000
+avd_config_base = avd_base + 0x110_0000
+dma_thing_base  = avd_base + 0x110_c000
 
-thing7_base     = avd_base + 0x140_0000
+wrap_ctrl_base  = avd_base + 0x140_0000
 
 def dump(base, sz):
     data = b''
@@ -204,7 +204,7 @@ p.write32(thing2_base + 0x0, 0x1fff)
 load(cm3_code_base, test_fw)
 p.write32(cm3_data_base + 0xf0, 0)
 
-# p.write32(cm3_ctrl_base + 0x08, 0xe)
+p.write32(cm3_ctrl_base + 0x08, 0xe)
 # p.write32(cm3_ctrl_base + 0x10, 0)
 # p.write32(cm3_ctrl_base + 0x48, 0)
 
@@ -371,7 +371,7 @@ p.write32(cm3_ctrl_base + 0x74, 0x1)
 # p.write32(cm3_ctrl_base + 0x10, 0x2)
 # p.write32(cm3_ctrl_base + 0x48, 0x8)
 
-# p.write32(cm3_ctrl_base + 0x08, 1)
+p.write32(cm3_ctrl_base + 0x08, 1)
 
 
 # NOTE: the following loop runs the following number of times per second
@@ -417,6 +417,7 @@ def m3_read(addr):
             print("TIMED OUT!!!")
             dbg = p.read32(cm3_data_base + 0x00)
             print(f"dbg {dbg:08X}")
+            m3_reboot()
             return 0xabad1dea
 
     return p.read32(cm3_data_base + 0x1c)
@@ -433,6 +434,7 @@ def m3_write(addr, val):
             print("TIMED OUT!!!")
             dbg = p.read32(cm3_data_base + 0x00)
             print(f"dbg {dbg:08X}")
+            m3_reboot()
             return
 
 def m3_get_irq_status():
@@ -459,6 +461,11 @@ def m3_clear_all_pending_irqs():
     m3_write(0xe000e294, 0xffffffff)
     m3_write(0xe000e298, 0xffffffff)
 
+def m3_reboot():
+    p.write32(cm3_data_base + 0x10, 0)
+    p.write32(cm3_ctrl_base + 0x08, 0xe)
+    p.write32(cm3_ctrl_base + 0x08, 1)
+
 # notes on M3-side hardware
 # 206 IRQs set up
 #   IRQ 0   mbox 0 empty
@@ -479,7 +486,14 @@ def m3_clear_all_pending_irqs():
 # irqs are masked in 0x10
 # 0x00000000    sz 0x10000      code ram (writable)
 # 0x10000000    sz 0x10000      data ram
-# 0x50010000    sz 0x4000       the m3 control block registers?
+# 0x40000000    sz 0x4000       AVDThing100Regs
+# 0x40020000    sz 0x4000       AVDThing102Regs
+# 0x40070000    sz 0x4000       AVDPIODMARegs
+# 0x40080000    sz 0x40000      ??? but doesn't fault on read, seems to be mostly 0
+# 0x40100000    sz 0x8000       AVDConfigRegs
+# 0x4010c000    sz 0x4000       AVDDMAThingyRegs
+# 0x40400000    sz 0x4000       AVDWrapCtrlRegs
+# 0x50010000    sz 0x4000       AVDCM3CtrlRegs
 
 # IRQs on AP
 # 1011          0x7c bit 19     mbox 0 (both empty and data)
