@@ -41,3 +41,8 @@ class DART8110Tracer(ADTDevTracer):
             self.dart.invalidate_cache()
         else:
             self.log(f"Unknown TLB op {tlb_op}")
+
+
+    def w_TCR(self, tcr, sid):
+        if self.verbose >= 3:
+            self.dart.dump_all()
