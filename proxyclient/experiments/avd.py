@@ -8,6 +8,7 @@ from m1n1.hw.dart8110 import DART8110
 from m1n1.utils import *
 import struct
 import subprocess
+import time
 
 
 p.pmgr_adt_clocks_enable(f'/arm-io/avd0')
@@ -44,7 +45,7 @@ def dump(base, sz):
 def load(base, data):
     for i in range(0, len(data), 4):
         addr = base + i
-        print(f"{addr:X}")
+        # print(f"{addr:X}")
         val = struct.unpack("<I", data[i:i+4])[0]
         p.write32(addr, val)
 
@@ -369,7 +370,7 @@ p.write32(cm3_ctrl_base + 0x74, 0x1)
 p.write32(cm3_ctrl_base + 0x10, 0x2)
 p.write32(cm3_ctrl_base + 0x48, 0x8)
 
-p.write(cm3_ctrl_base + 0x08, 1)
+p.write32(cm3_ctrl_base + 0x08, 1)
 
 
 # NOTE: the following loop runs the following number of times per second
@@ -403,3 +404,32 @@ p.write(cm3_ctrl_base + 0x08, 1)
 # 64370786
 # 64391695
 # 64373101
+
+def m3_read(addr):
+    p.write32(cm3_data_base + 0x14, addr)
+    p.write32(cm3_data_base + 0x18, 0)
+    p.write32(cm3_data_base + 0x10, 1)
+
+    start_time = time.time()
+    while p.read32(cm3_data_base + 0x10) != 0:
+        if time.time() - start_time > 2:
+            print("TIMED OUT!!!")
+            dbg = p.read32(cm3_data_base + 0x00)
+            print(f"dbg {dbg:08X}")
+            return 0xabad1dea
+
+    return p.read32(cm3_data_base + 0x1c)
+
+def m3_write(addr, val):
+    p.write32(cm3_data_base + 0x14, addr)
+    p.write32(cm3_data_base + 0x18, 1)
+    p.write32(cm3_data_base + 0x1c, val)
+    p.write32(cm3_data_base + 0x10, 1)
+
+    start_time = time.time()
+    while p.read32(cm3_data_base + 0x10) != 0:
+        if time.time() - start_time > 2:
+            print("TIMED OUT!!!")
+            dbg = p.read32(cm3_data_base + 0x00)
+            print(f"dbg {dbg:08X}")
+            return

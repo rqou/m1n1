@@ -150,12 +150,39 @@ _start:
     .word irq123+1
 
 
+// hax IPC:
+//  +0x10 = flag
+//  +0x14 = addr
+//  +0x18 = WnR
+//  +0x1c = val
 start:
     mov r0, #0x10000000
-    movs r1, #0
-1:
+    movs r1, #0x55
     str r1, [r0]
-    adds r1, #1
+
+1:
+    ldr r1, [r0, #0x10]
+    cmp r1, #1
+    bne 1b
+
+    // addr
+    ldr r1, [r0, #0x14]
+    // WnR
+    ldr r2, [r0, #0x18]
+    cmp r2, #0
+    bne 2f
+    // read
+    ldr r2, [r1]
+    str r2, [r0, #0x1c]
+    movs r2, #0
+    str r2, [r0, #0x10]
+    b 1b
+2:
+    // write
+    ldr r2, [r0, #0x1c]
+    str r2, [r1]
+    movs r2, #0
+    str r2, [r0, #0x10]
     b 1b
 
 nmi:
