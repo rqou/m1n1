@@ -43,6 +43,6 @@ class DART8110Tracer(ADTDevTracer):
             self.log(f"Unknown TLB op {tlb_op}")
 
 
-    def w_TCR(self, tcr, sid):
+    def w_TTBR(self, ttbr, sid):
         if self.verbose >= 3:
             self.dart.dump_all()
