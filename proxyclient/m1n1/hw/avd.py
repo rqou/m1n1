@@ -69,6 +69,8 @@ class AVDCM3CtrlRegs(RegMap):
     # bit2 = ??? hold cpu in reset
     # bit1 = ??? also holds cpu in reset, but differently????
     # bit0 = run???? obviously not, the CPU runs even if i clear it
+    # init value is 0x2 and writing 0 is enough to make it boot
+    # not sure what the write of 0x1 does
     RUN_CONTROL                         = 0x08, Register32
     # seems to be read-only
     REG_0xc                             = 0x0c, Register32
@@ -107,7 +109,6 @@ class AVDCM3CtrlRegs(RegMap):
     # IRQ9 on M3
     COUNTER1_CONFIG                     = 0x88, R_COUNTER_CONFIG
     COUNTER1_VAL                        = 0x8c, Register32
-
     # Used to communicate boot completion between fw<->host
     # FLAGS0 = IRQ12
     # FLAGS1 = IRQ13

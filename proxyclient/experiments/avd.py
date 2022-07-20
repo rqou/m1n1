@@ -204,9 +204,9 @@ p.write32(thing2_base + 0x0, 0x1fff)
 load(cm3_code_base, test_fw)
 p.write32(cm3_data_base + 0xf0, 0)
 
-p.write32(cm3_ctrl_base + 0x08, 0xe)
-p.write32(cm3_ctrl_base + 0x10, 0)
-p.write32(cm3_ctrl_base + 0x48, 0)
+# p.write32(cm3_ctrl_base + 0x08, 0xe)
+# p.write32(cm3_ctrl_base + 0x10, 0)
+# p.write32(cm3_ctrl_base + 0x48, 0)
 
 # # tunables
 # p.write32(0x286000000 + 0x1100008, 0x80000000)
@@ -362,16 +362,16 @@ p.write32(cm3_ctrl_base + 0x48, 0)
 # p.write32(0x286000000 + 0x107001c, 0xfff0)
 # p.write32(0x286000000 + 0x1070020, 0xfff0)
 
-p.write32(cm3_ctrl_base + 0x10, 0x0)
-p.write32(cm3_ctrl_base + 0x48, 0x0)
-p.write32(cm3_ctrl_base + 0x50, 0x1)
-p.write32(cm3_ctrl_base + 0x68, 0x1)
-p.write32(cm3_ctrl_base + 0x5c, 0x1)
-p.write32(cm3_ctrl_base + 0x74, 0x1)
-p.write32(cm3_ctrl_base + 0x10, 0x2)
-p.write32(cm3_ctrl_base + 0x48, 0x8)
+# p.write32(cm3_ctrl_base + 0x10, 0x0)
+# p.write32(cm3_ctrl_base + 0x48, 0x0)
+# p.write32(cm3_ctrl_base + 0x50, 0x1)
+# p.write32(cm3_ctrl_base + 0x68, 0x1)
+# p.write32(cm3_ctrl_base + 0x5c, 0x1)
+# p.write32(cm3_ctrl_base + 0x74, 0x1)
+# p.write32(cm3_ctrl_base + 0x10, 0x2)
+# p.write32(cm3_ctrl_base + 0x48, 0x8)
 
-p.write32(cm3_ctrl_base + 0x08, 1)
+# p.write32(cm3_ctrl_base + 0x08, 1)
 
 
 # NOTE: the following loop runs the following number of times per second
