@@ -28,12 +28,16 @@ class AVDTracer(Tracer):
         self.trace_regmap(avd_base + 0x140_0000, 0x4000, AVDWrapCtrlRegs, name="WRAP_CTRL", prefix="WRAP_CTRL")
         self.dart_tracer.start()
 
+    def w_CM3Ctrl_START_RELATED_THING(self, val):
+        print(val)
+        self.dart_tracer.dart.dump_all()
+
 AVDTracer = AVDTracer._reloadcls()
 
 p.pmgr_adt_clocks_enable('/arm-io/dart-avd0')
 p.pmgr_adt_clocks_enable('/arm-io/avd0')
 
-dart_tracer = DART8110Tracer(hv, "/arm-io/dart-avd0", verbose=3)
+dart_tracer = DART8110Tracer(hv, "/arm-io/dart-avd0", verbose=1)
 print(dart_tracer)
 tracer = AVDTracer(hv, '/arm-io/avd0', dart_tracer, verbose=3)
 tracer.start()

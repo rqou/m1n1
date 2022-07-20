@@ -30,6 +30,8 @@ class AVDPIODMARegs(RegMap):
 
 
 class AVDCM3CtrlRegs(RegMap):
+    START_RELATED_THING                 = 0x08, Register32
+
     INT_ENABLE_THING0                   = 0x10, Register32
 
     INT_ENABLE_THING1                   = 0x48, Register32
