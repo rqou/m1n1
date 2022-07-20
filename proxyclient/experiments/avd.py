@@ -7,6 +7,7 @@ from m1n1.setup import *
 from m1n1.hw.dart8110 import DART8110
 from m1n1.utils import *
 import struct
+import subprocess
 
 
 p.pmgr_adt_clocks_enable(f'/arm-io/avd0')
@@ -50,7 +51,23 @@ def load(base, data):
     return data
 
 
-with open('avd-fw-orig.bin', 'rb') as f:
+ret = subprocess.call([
+    'arm-none-eabi-gcc',
+    '-ggdb',
+    '-nostdlib',
+    '-Wl,-Ttext,0',
+    '-o', 'avd_fw_test.elf',
+    'avd_fw_test.S'])
+assert ret == 0
+ret = subprocess.call([
+    'arm-none-eabi-objcopy',
+    '-O', 'binary',
+    'avd_fw_test.elf',
+    'avd_fw_test.bin'])
+assert ret == 0
+
+
+with open('avd_fw_test.bin', 'rb') as f:
     test_fw = f.read()
 
 assert len(test_fw) <= 0x10000
@@ -352,4 +369,37 @@ p.write32(cm3_ctrl_base + 0x74, 0x1)
 p.write32(cm3_ctrl_base + 0x10, 0x2)
 p.write32(cm3_ctrl_base + 0x48, 0x8)
 
-# p.write(cm3_ctrl_base + 0x08, 1)
+p.write(cm3_ctrl_base + 0x08, 1)
+
+
+# NOTE: the following loop runs the following number of times per second
+# start:
+#    mov r0, #0x10000000
+#    movs r1, #0
+#1:
+#    str r1, [r0]
+#    adds r1, #1
+#    b 1b
+# 64397529
+# 64383456
+# 64390321
+# 64386696
+# 64387557
+# 64384937
+# 64395642
+# 64390264
+# 64387706
+# 64391074
+# 64382244
+# 64392814
+# 64363923
+# 64393883
+# 64366853
+# 64385064
+# 64385699
+# 64392906
+# 64374883
+# 64389206
+# 64370786
+# 64391695
+# 64373101
