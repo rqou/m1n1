@@ -158,6 +158,7 @@ _start:
 //  +0x1c = val
 //  +0xf0 = boot count
 start:
+    cpsid i
     mov r0, #0x10000000
     movs r1, #0x55
     str r1, [r0]

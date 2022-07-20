@@ -54,6 +54,10 @@ class AVDCM3CtrlRegs(RegMap):
     # seems to be read-only
     REG_0xc                             = 0x0c, Register32
     # 0x3fff
+    # bit0 = irq0
+    # bit2 = irq2
+    # bit4 = irq4
+    # bit6 = irq6
     INT_ENABLE_THING0                   = 0x10, Register32
     # R/W, 32 bits
     REG_0x14                            = 0x14, Register32
@@ -62,10 +66,15 @@ class AVDCM3CtrlRegs(RegMap):
     REG_0x20                            = 0x20, Register32
     REG_0x24                            = 0x24, Register32
     REG_0x28                            = 0x28, Register32
+    # 0xcff
+    # mailbox type IRQ status here
+    IRQ_STATUS_CLEAR_THING0             = 0x2c, Register32
 
     # 0x3ff
+    # bit0 = "m3 inbox empty interrupt"
     INT_ENABLE_THING1                   = 0x48, Register32
-
+    # XXX something related to mailbox status?
+    REG_0x4c                            = 0x4c, Register32
     MAILBOX0_STATUS                     = 0x50, R_MBOX_STATUS
     MAILBOX0_SUBMIT                     = 0x54, Register32
     MAILBOX0_RETRIEVE                   = 0x58, Register32
@@ -78,6 +87,16 @@ class AVDCM3CtrlRegs(RegMap):
     MAILBOX3_STATUS                     = 0x74, R_MBOX_STATUS
     MAILBOX3_SUBMIT                     = 0x78, Register32
     MAILBOX3_RETRIEVE                   = 0x7c, Register32
+    # Write 0xffffffff -> 0x81
+    # Writing 1 triggers IRQ8
+    IRQ_TRIGGER_THING0                  = 0x80, Register32
+    # R/W, 32 bits
+    REG_0x84                            = 0x84, Register32
+    # Write 0xffffffff -> 0x81
+    # Writing 1 triggers IRQ9
+    IRQ_TRIGGER_THING1                  = 0x88, Register32
+    # Some kind of counter????
+    REG_0x8c                            = 0x8c, Register32
 
     # Used to communicate boot completion between fw<->host
     FLAGS0_SET                          = 0x90, Register32

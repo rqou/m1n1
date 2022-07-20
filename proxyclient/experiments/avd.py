@@ -58,7 +58,7 @@ ret = subprocess.call([
     '-nostdlib',
     '-Wl,-Ttext,0',
     '-o', 'avd_fw_test.elf',
-    'avd_fw_test.S'])
+    f'{pathlib.Path(__file__).resolve().parents[0]}/avd_m1cro.S'])
 assert ret == 0
 ret = subprocess.call([
     'arm-none-eabi-objcopy',
@@ -435,7 +435,49 @@ def m3_write(addr, val):
             print(f"dbg {dbg:08X}")
             return
 
+def m3_get_irq_status():
+    irq_pend = []
+    irq_pend.append(m3_read(0xe000e200))
+    irq_pend.append(m3_read(0xe000e204))
+    irq_pend.append(m3_read(0xe000e208))
+    irq_pend.append(m3_read(0xe000e20c))
+    irq_pend.append(m3_read(0xe000e210))
+    irq_pend.append(m3_read(0xe000e214))
+    irq_pend.append(m3_read(0xe000e218))
+
+    for i in range(len(irq_pend)):
+        for j in range(32):
+            if irq_pend[i] & (1 << j):
+                print(f"IRQ {i * 32 + j} pending")
+
+def m3_clear_all_pending_irqs():
+    m3_write(0xe000e280, 0xffffffff)
+    m3_write(0xe000e284, 0xffffffff)
+    m3_write(0xe000e288, 0xffffffff)
+    m3_write(0xe000e28c, 0xffffffff)
+    m3_write(0xe000e290, 0xffffffff)
+    m3_write(0xe000e294, 0xffffffff)
+    m3_write(0xe000e298, 0xffffffff)
+
 # notes on M3-side hardware
+# 206 IRQs set up
+#   IRQ 0   mbox 0 empty
+#   IRQ 1   mbox 0 data
+#   IRQ 2   mbox 1 empty
+#   IRQ 3   mbox 1 data
+#   IRQ 4   mbox 2 empty
+#   IRQ 5   mbox 2 data
+#   IRQ 6   mbox 3 empty
+#   IRQ 7   mbox 3 data
+#   IRQ 8   triggered by 0x80
+#   IRQ 9   triggered by 0x88
+#   IRQ 10  mailbox 0/1 overflowed?
+#   IRQ 11  mailbox 2/3 overflowed?
+#   IRQ 12  flags0 has bits set
+#   IRQ 13  flags1 has bits set
+# status of mailbox interrupts shows up at 0x2c and is cleared there
+# irqs are masked in 0x10
+# not sure what 0x48 does?
 # 0x00000000    sz 0x10000      code ram (writable)
 # 0x10000000    sz 0x10000      data ram
 # 0x50010000    sz 0x4000       the m3 control block registers?
