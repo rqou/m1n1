@@ -67,7 +67,7 @@ class R_PIODMA_ERROR_STATUS(Register32):
     ERR_PIO_WR              = 31
 
 
-class PIODMA_PACKET_WRITE(Register32):
+class PIODMA_PACKET_RW(Register32):
     INCREMENT               = 0
     MUST_BE_ZERO            = 1
     ADDR                    = 17, 2

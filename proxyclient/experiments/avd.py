@@ -488,16 +488,23 @@ def pack_words(words):
     return output
 
 piodma_commands = pack_words([
-    int(PIODMA_PACKET_WRITE(INCREMENT=1, ADDR=0, COUNT_MINUS_ONE=0, BASE_ADDR_REG=0)),
-    0xcafebabe,
+    int(PIODMA_PACKET_RW(INCREMENT=0, ADDR=0, COUNT_MINUS_ONE=0, BASE_ADDR_REG=3)),
+    int(PIODMA_PACKET_LINK(MUST_BE_ONE=3, COUNT=2)),
+    0x8000000c,
+    int(PIODMA_PACKET_RW(INCREMENT=0, ADDR=2, COUNT_MINUS_ONE=0, BASE_ADDR_REG=3)),
+    int(PIODMA_PACKET_RW(INCREMENT=0, ADDR=1, COUNT_MINUS_ONE=0, BASE_ADDR_REG=3)),
+
+
+
+    # 0xcafebabe,
     # int(PIODMA_PACKET_LINK(MUST_BE_ONE=3, COUNT=5)),
     # 0x80000008,
 
-    int(PIODMA_PACKET_WRITE(INCREMENT=1, ADDR=0, COUNT_MINUS_ONE=0, BASE_ADDR_REG=3)),
-    0xcafebabe,
-    int(PIODMA_PACKET_WRITE(INCREMENT=1, ADDR=0, COUNT_MINUS_ONE=1, BASE_ADDR_REG=0)),
-    0xfeedf00d,
-    0xb00b1e5,
+    # int(PIODMA_PACKET_RW(INCREMENT=1, ADDR=0, COUNT_MINUS_ONE=0, BASE_ADDR_REG=3)),
+    # 0xcafebabe,
+    # int(PIODMA_PACKET_RW(INCREMENT=1, ADDR=0, COUNT_MINUS_ONE=1, BASE_ADDR_REG=0)),
+    # 0xfeedf00d,
+    # 0xb00b1e5,
 ])
 
 piodma_sz = divroundup(len(piodma_commands), 0x4000) * 0x4000
@@ -518,9 +525,9 @@ p.write32(cm3_data_base + 0x1004, 0xaaaaaaaa)
 p.write32(cm3_data_base + 0x1008, 0xaaaaaaaa)
 p.write32(cm3_data_base + 0x100c, 0xaaaaaaaa)
 p.write32(cm3_data_base + 0x2000, 0xbbbbbbbb)
-p.write32(cm3_data_base + 0x2004, 0xbbbbbbbb)
-p.write32(cm3_data_base + 0x2008, 0xbbbbbbbb)
-p.write32(cm3_data_base + 0x200c, 0xbbbbbbbb)
+p.write32(cm3_data_base + 0x2004, 0xbbbbbbbc)
+p.write32(cm3_data_base + 0x2008, 0xbbbbbbbd)
+p.write32(cm3_data_base + 0x200c, 0xbbbbbbbe)
 
 piodma.BASE_ADDR_LO[0].val = 0x28709100
 piodma.BASE_ADDR_LO[1].val = 0xaaaaaaaa
@@ -535,8 +542,13 @@ p.write32(piodma_base + 0x44, (piodma_buf_iova + 0x1000) & 0xffffffff)
 
 print("before", hex(p.read32(piodma_buf_phys + 0x1000)))
 print("before", hex(p.read32(piodma_buf_phys + 0x1004)))
+print("before", hex(p.read32(piodma_buf_phys + 0x1008)))
+print("before", hex(p.read32(piodma_buf_phys + 0x100c)))
+print("before", hex(p.read32(piodma_buf_phys + 0x1010)))
+print("before", hex(p.read32(piodma_buf_phys + 0x1014)))
+print("before", hex(p.read32(piodma_buf_phys + 0x1018)))
 
-piodma.COMMAND = R_PIODMA_COMMAND(CMD=0x13, COUNT=2)
+piodma.COMMAND = R_PIODMA_COMMAND(CMD=0x13, COUNT=3)
 
 print(hex(p.read32(cm3_data_base + 0x1000)))
 print(hex(p.read32(cm3_data_base + 0x1004)))
@@ -549,6 +561,11 @@ print(hex(p.read32(cm3_data_base + 0x200c)))
 
 print("after", hex(p.read32(piodma_buf_phys + 0x1000)))
 print("after", hex(p.read32(piodma_buf_phys + 0x1004)))
+print("after", hex(p.read32(piodma_buf_phys + 0x1008)))
+print("after", hex(p.read32(piodma_buf_phys + 0x100c)))
+print("after", hex(p.read32(piodma_buf_phys + 0x1010)))
+print("after", hex(p.read32(piodma_buf_phys + 0x1014)))
+print("after", hex(p.read32(piodma_buf_phys + 0x1018)))
 
 print(piodma.IRQ_STATUS)
 print(piodma.STATUS)
