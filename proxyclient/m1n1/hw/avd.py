@@ -49,6 +49,14 @@ class R_PIODMA_STATUS(Register32):
     BUSY                    = 31
 
 
+class R_PIODMA_COMMAND(Register32):
+    # 7 = cancel
+    # 0x11 = normal
+    # 0x19 = different
+    CMD                     = 7, 0
+    COUNT                   = 30, 8
+
+
 class R_PIODMA_ERROR_STATUS(Register32):
     # this doesn't seem to make sense or be understood
     PARSE_COUNTS            = 15, 0
@@ -56,6 +64,23 @@ class R_PIODMA_ERROR_STATUS(Register32):
     ERR_MEM_WR              = 29
     ERR_PIO_RD              = 30
     ERR_PIO_WR              = 31
+
+
+class PIODMA_PACKET_WRITE(Register32):
+    INCREMENT               = 0
+    MUST_BE_ZERO            = 1
+    ADDR                    = 17, 2
+    COUNT_MINUS_ONE         = 29, 18
+    # not sure how to use regs >= 4???
+    BASE_ADDR_REG           = 31, 30
+
+
+class PIODMA_PACKET_LINK(Register32):
+    MUST_BE_ONE             = 1, 0
+    _UNK0                   = 3, 2
+    COUNT                   = 25, 4
+    _UNK1                   = 27, 26
+    IOVA_HI                 = 31, 28
 
 
 class AVDPIODMARegs(RegMap):
@@ -81,10 +106,7 @@ class AVDPIODMARegs(RegMap):
     SRC_ADDR_LO                         = 0x4c, Register32
     SRC_ADDR_HI                         = 0x50, Register32
     # 0xffffff7e
-    # 0x11  = normal
-    # 0x19  = scaler sometimes uses
-    # 0x07  = cancel
-    COMMAND                             = 0x54, Register32
+    COMMAND                             = 0x54, R_PIODMA_COMMAND
 
     # regs here not writable, all 0 on start
 

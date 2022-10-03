@@ -488,8 +488,12 @@ def pack_words(words):
     return output
 
 piodma_commands = pack_words([
-    (3 << 30) | (2 << 18) | 0 | 1,
+    int(PIODMA_PACKET_LINK(MUST_BE_ONE=3, COUNT=5)),
+    0x80000008,
+
+    int(PIODMA_PACKET_WRITE(INCREMENT=1, ADDR=0, COUNT_MINUS_ONE=0, BASE_ADDR_REG=3)),
     0xcafebabe,
+    int(PIODMA_PACKET_WRITE(INCREMENT=1, ADDR=0, COUNT_MINUS_ONE=1, BASE_ADDR_REG=0)),
     0xfeedf00d,
     0xb00b1e5,
 ])
@@ -502,7 +506,7 @@ iface.writemem(piodma_buf_phys, piodma_commands)
 piodma_buf_iova = dart.iomap(1, piodma_buf_phys, piodma_sz)
 print(f"PIODMA buffer @ phys {piodma_buf_phys:016X} iova {piodma_buf_iova:016X}")
 
-piodma.COMMAND = 0x7
+piodma.COMMAND = R_PIODMA_COMMAND(CMD=0x7)
 piodma.IRQ_STATUS = 0xffffffff
 piodma.SRC_ADDR_LO = piodma_buf_iova & 0xffffffff
 piodma.SRC_ADDR_HI = (piodma_buf_iova >> 32) & 0xffffffff
@@ -525,7 +529,7 @@ piodma.BASE_ADDR_LO[5].val = 0xaaaaaaaa
 piodma.BASE_ADDR_LO[6].val = 0xaaaaaaaa
 piodma.BASE_ADDR_LO[7].val = 0xaaaaaaaa
 
-piodma.COMMAND = 0x411
+piodma.COMMAND = R_PIODMA_COMMAND(CMD=0x11, COUNT=2)
 
 print(hex(p.read32(cm3_data_base + 0x1000)))
 print(hex(p.read32(cm3_data_base + 0x1004)))
