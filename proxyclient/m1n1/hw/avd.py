@@ -18,36 +18,59 @@ class AVDThing102Regs(RegMap):
     pass
 
 
+class R_PIODMA_CFG(Register32):
+    # this might be "halt" according to scaler RE
+    _BIT0       = 0
+    # dunno, but this is set on reset
+    _BIT1       = 1
+
+
+class R_PIODMA_IRQ(Register32):
+    DONE                    = 0
+    COMMAND_PARSE_ERROR     = 1
+    SEQUENCE_FIFO_OVERFLOW  = 2
+    AXI_BUS_ERROR           = 3
+    # haven't been able to trigger this one yet
+    ADDRESS_BOUNDS_ERROR    = 4
+    _BIT5                   = 5
+    # this gets set when finishing a normal command
+    _BIT6                   = 6
+    _BIT7                   = 7
+    # this gets set if i use 0x19 instead of 0x11
+    _BIT8                   = 8
+    _BIT9                   = 9
+
+
+class R_PIODMA_STATUS(Register32):
+    FREE_COMMAND_COUNT      = 5, 0
+    COMMANDS_COMPLETED      = 21, 16
+    # indicates something, happens when i link a 0 size at the end
+    _BIT22                  = 22
+    BUSY                    = 31
+
+
+class R_PIODMA_ERROR_STATUS(Register32):
+    # this doesn't seem to make sense or be understood
+    PARSE_COUNTS            = 15, 0
+    ERR_MEM_RD              = 28
+    ERR_MEM_WR              = 29
+    ERR_PIO_RD              = 30
+    ERR_PIO_WR              = 31
+
+
 class AVDPIODMARegs(RegMap):
-    # bit1 = ???
-    # bit0 = halt???
-    CFG                                 = 0x00, Register32
-    # TO BE CONFIRMED, FROM SCALER RE
-        # 4 = address bounds error
-    # 3 = AXI bus error
-    # 2 = sequence fifo overflow
-    # 1 = command parse error
-    # 0 = done
-    IRQ_STATUS                          = 0x04, Register32
-    # max 0x3ff, higher bits unclear
-        # 4 = address bounds error
-    # 3 = AXI bus error
-    # 2 = sequence fifo overflow
-    # 1 = command parse error
-    # 0 = done
-    IRQ_ENABLE                          = 0x08, Register32
-    # 31 = busy
-    # 22 = indicates something, happens when i link a 0 size at the end
-    # [20:16] = commands completed
-    # [5:0] = free command count
-    STATUS                              = 0x0c, Register32
+    CFG                                 = 0x00, R_PIODMA_CFG
+    IRQ_STATUS                          = 0x04, R_PIODMA_IRQ
+    IRQ_ENABLE                          = 0x08, R_PIODMA_IRQ
+    STATUS                              = 0x0c, R_PIODMA_STATUS
     # Tunables of some kind
     DMACFGMEMSRC                        = 0x10, Register32
     DMACFGMEMDAT                        = 0x14, Register32
     DMACFGMEMDST                        = 0x18, Register32
     DMACFGPIORD                         = 0x1c, Register32
     DMACFGPIOWR                         = 0x20, Register32
-    # TO BE CONFIRMED, FROM SCALER RE
+    # at least four of them work, not sure about the other four
+    # addr >> 4
     BASE_ADDR_LO                        = irange(0x24, 8, 4), Register32
 
     # 0x44
@@ -82,13 +105,7 @@ class AVDPIODMARegs(RegMap):
 
     # another block of not writable, all 0 on start
 
-    # 31 = ErrPIOWr
-    # 30 = ErrPIORd
-    # 29 = ErrMemWr
-    # 28 = ErrMemRd
-    # TO BE CONFIRMED, FROM SCALER RE
-    #     [15:0] = parse count
-    ERROR_STATUS                        = 0xc4, Register32
+    ERROR_STATUS                        = 0xc4, R_PIODMA_ERROR_STATUS
 
     # 0xd0
     # 0xc0000002
@@ -104,6 +121,7 @@ class AVDPIODMARegs(RegMap):
     # 0xffff
 
     # TO BE CONFIRMED, FROM SCALER RE
+    # XXX it doesn't seem to work
     BASE_ADDR_HI                        = irange(0xf0, 8, 4), Register32
 
 

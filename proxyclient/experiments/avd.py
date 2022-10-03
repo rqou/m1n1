@@ -4,6 +4,7 @@ import sys, pathlib
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[1]))
 
 from m1n1.setup import *
+from m1n1.hw.avd import *
 from m1n1.hw.dart8110 import DART8110
 from m1n1.utils import *
 import struct
@@ -474,6 +475,7 @@ dart.initialize()
 # dart.regs.TCR[15].val = 0x2
 # dart.regs.TTBR[15].val = 0x200000
 
+piodma = AVDPIODMARegs(u, piodma_base)
 
 
 def divroundup(val, div):
@@ -486,18 +488,10 @@ def pack_words(words):
     return output
 
 piodma_commands = pack_words([
-    (0 << 18) | 0 | 1,
+    (3 << 30) | (2 << 18) | 0 | 1,
     0xcafebabe,
-    (0 << 18) | 8 | 1,
     0xfeedf00d,
-
-    (2 << 4) | 3,
-    0x80000020,
-    (0 << 18) | 4 | 1,
     0xb00b1e5,
-
-    (2 << 4) | 3,
-    0x80000018,
 ])
 
 piodma_sz = divroundup(len(piodma_commands), 0x4000)
@@ -508,24 +502,42 @@ iface.writemem(piodma_buf_phys, piodma_commands)
 piodma_buf_iova = dart.iomap(1, piodma_buf_phys, piodma_sz)
 print(f"PIODMA buffer @ phys {piodma_buf_phys:016X} iova {piodma_buf_iova:016X}")
 
-p.write32(piodma_base + 0x54, 0x7)
-p.write32(piodma_base + 0x4, 0xffffffff)
-p.write32(piodma_base + 0x4c, piodma_buf_iova & 0xffffffff)
-p.write32(piodma_base + 0x50, (piodma_buf_iova >> 32) & 0xffffffff)
-
+piodma.COMMAND = 0x7
+piodma.IRQ_STATUS = 0xffffffff
+piodma.SRC_ADDR_LO = piodma_buf_iova & 0xffffffff
+piodma.SRC_ADDR_HI = (piodma_buf_iova >> 32) & 0xffffffff
 
 p.write32(cm3_data_base + 0x1000, 0xaaaaaaaa)
 p.write32(cm3_data_base + 0x1004, 0xaaaaaaaa)
 p.write32(cm3_data_base + 0x1008, 0xaaaaaaaa)
 p.write32(cm3_data_base + 0x100c, 0xaaaaaaaa)
-p.write32(piodma_base + 0x24, 0x28709100)
-p.write32(piodma_base + 0x54, 0x611)
+p.write32(cm3_data_base + 0x2000, 0xbbbbbbbb)
+p.write32(cm3_data_base + 0x2004, 0xbbbbbbbb)
+p.write32(cm3_data_base + 0x2008, 0xbbbbbbbb)
+p.write32(cm3_data_base + 0x200c, 0xbbbbbbbb)
+
+piodma.BASE_ADDR_LO[0].val = 0x28709100
+piodma.BASE_ADDR_LO[1].val = 0xaaaaaaaa
+piodma.BASE_ADDR_LO[2].val = 0xaaaaaaaa
+piodma.BASE_ADDR_LO[3].val = 0x28709200
+piodma.BASE_ADDR_LO[4].val = 0xaaaaaaaa
+piodma.BASE_ADDR_LO[5].val = 0xaaaaaaaa
+piodma.BASE_ADDR_LO[6].val = 0xaaaaaaaa
+piodma.BASE_ADDR_LO[7].val = 0xaaaaaaaa
+
+piodma.COMMAND = 0x411
+
 print(hex(p.read32(cm3_data_base + 0x1000)))
 print(hex(p.read32(cm3_data_base + 0x1004)))
 print(hex(p.read32(cm3_data_base + 0x1008)))
 print(hex(p.read32(cm3_data_base + 0x100c)))
-print(hex(p.read32(piodma_base + 0x4)))
-print(hex(p.read32(piodma_base + 0xc)))
+print(hex(p.read32(cm3_data_base + 0x2000)))
+print(hex(p.read32(cm3_data_base + 0x2004)))
+print(hex(p.read32(cm3_data_base + 0x2008)))
+print(hex(p.read32(cm3_data_base + 0x200c)))
+
+print(piodma.IRQ_STATUS)
+print(piodma.STATUS)
 # why is status 0x41 after this?
 
 
