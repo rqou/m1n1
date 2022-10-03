@@ -37,6 +37,7 @@ class R_PIODMA_IRQ(Register32):
     _BIT7                   = 7
     # this gets set if i use 0x19 instead of 0x11
     _BIT8                   = 8
+    # this gets set if i use 0x1b instead of 0x13
     _BIT9                   = 9
 
 
@@ -50,10 +51,17 @@ class R_PIODMA_STATUS(Register32):
 
 class R_PIODMA_COMMAND(Register32):
     # bit0 = go?
+    # bit2-1 cmd
+    #  00 = write
+    #  01 = read
+    #  10 = ????
+    #  11 = cancel
+    # bit3 = do something different
     # 7 = cancel
     # 0x11 = normal
-    # 0x13 = pio read error (so, the other way around?)
+    # 0x13 = read
     # 0x19 = different
+    # bit4 = make r/w work
     CMD                     = 7, 0
     COUNT                   = 30, 8
 
@@ -98,12 +106,8 @@ class AVDPIODMARegs(RegMap):
     # at least four of them work, not sure about the other four
     # addr >> 4
     BASE_ADDR_LO                        = irange(0x24, 8, 4), Register32
-
-    # 0x44
-    # 0xffffffff
-    # 0x48
-    # 0x3ff
-
+    DST_ADDR_LO                         = 0x44, Register32
+    DST_ADDR_HI                         = 0x48, Register32
     SRC_ADDR_LO                         = 0x4c, Register32
     SRC_ADDR_HI                         = 0x50, Register32
     # 0xffffff7e
