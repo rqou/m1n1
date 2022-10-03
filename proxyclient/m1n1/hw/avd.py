@@ -20,7 +20,7 @@ class AVDThing102Regs(RegMap):
 
 class AVDPIODMARegs(RegMap):
     # bit1 = ???
-    # bit0 = ???
+    # bit0 = halt???
     CFG                                 = 0x00, Register32
     # TO BE CONFIRMED, FROM SCALER RE
         # 4 = address bounds error
@@ -37,6 +37,7 @@ class AVDPIODMARegs(RegMap):
     # 0 = done
     IRQ_ENABLE                          = 0x08, Register32
     # 31 = busy
+    # 22 = indicates something, happens when i link a 0 size at the end
     # [20:16] = commands completed
     # [5:0] = free command count
     STATUS                              = 0x0c, Register32
@@ -81,11 +82,11 @@ class AVDPIODMARegs(RegMap):
 
     # another block of not writable, all 0 on start
 
-    # TO BE CONFIRMED, FROM SCALER RE
-    #     31 = ErrPIOWr
-    #     30 = ErrPIORd
-    #     29 = ErrMemWr
+    # 31 = ErrPIOWr
+    # 30 = ErrPIORd
+    # 29 = ErrMemWr
     # 28 = ErrMemRd
+    # TO BE CONFIRMED, FROM SCALER RE
     #     [15:0] = parse count
     ERROR_STATUS                        = 0xc4, Register32
 
@@ -105,7 +106,8 @@ class AVDPIODMARegs(RegMap):
     # TO BE CONFIRMED, FROM SCALER RE
     BASE_ADDR_HI                        = irange(0xf0, 8, 4), Register32
 
-class R_CM3_IRQ(Register32):
+
+class R_CM3_IRQ_0(Register32):
     MBOX0_EMPTY     = 0
     MBOX0_NOT_EMPTY = 1
     MBOX1_EMPTY     = 2
@@ -120,6 +122,10 @@ class R_CM3_IRQ(Register32):
     MBOX23_OVERFLOW = 11
     FLAGS0          = 12
     FLAGS1          = 13
+
+
+class R_CM3_IRQ_1(Register32):
+    PIODMA          = 8
 
 
 class R_AP_IRQ(Register32):
@@ -174,16 +180,17 @@ class AVDCM3CtrlRegs(RegMap):
     RUN_CONTROL                         = 0x08, Register32
     # seems to be read-only
     REG_0xc                             = 0x0c, Register32
-    CM3_IRQ_ENABLE                      = 0x10, R_CM3_IRQ
+    CM3_IRQ_ENABLE_0                    = 0x10, R_CM3_IRQ_0
+    CM3_IRQ_ENABLE_1                    = 0x14, R_CM3_IRQ_1
     # R/W, 32 bits, may also be CM3 IRQ enables?
-    REG_0x14                            = 0x14, Register32
     REG_0x18                            = 0x18, Register32
     REG_0x1c                            = 0x1c, Register32
     REG_0x20                            = 0x20, Register32
     REG_0x24                            = 0x24, Register32
     REG_0x28                            = 0x28, Register32
     # Write 1 to clear
-    CM3_IRQ_STATUS_CLR                  = 0x2c, R_CM3_IRQ
+    CM3_IRQ_STATUS_CLR_0                = 0x2c, R_CM3_IRQ_0
+    CM3_IRQ_STATUS_CLR_1                = 0x30, R_CM3_IRQ_1
     # There may be more IRQ status regs here
 
     AP_IRQ_ENABLE                       = 0x48, R_AP_IRQ

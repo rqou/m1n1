@@ -486,11 +486,18 @@ def pack_words(words):
     return output
 
 piodma_commands = pack_words([
-    (2 << 18) | 0 | 1,
+    (0 << 18) | 0 | 1,
     0xcafebabe,
+    (0 << 18) | 8 | 1,
     0xfeedf00d,
+
+    (2 << 4) | 3,
+    0x80000020,
+    (0 << 18) | 4 | 1,
     0xb00b1e5,
-    0,
+
+    (2 << 4) | 3,
+    0x80000018,
 ])
 
 piodma_sz = divroundup(len(piodma_commands), 0x4000)
@@ -512,7 +519,7 @@ p.write32(cm3_data_base + 0x1004, 0xaaaaaaaa)
 p.write32(cm3_data_base + 0x1008, 0xaaaaaaaa)
 p.write32(cm3_data_base + 0x100c, 0xaaaaaaaa)
 p.write32(piodma_base + 0x24, 0x28709100)
-p.write32(piodma_base + 0x54, 0x411)
+p.write32(piodma_base + 0x54, 0x611)
 print(hex(p.read32(cm3_data_base + 0x1000)))
 print(hex(p.read32(cm3_data_base + 0x1004)))
 print(hex(p.read32(cm3_data_base + 0x1008)))
@@ -538,6 +545,8 @@ print(hex(p.read32(piodma_base + 0xc)))
 #   IRQ 11  mailbox 2/3 overflowed?
 #   IRQ 12  flags0 has bits set
 #   IRQ 13  flags1 has bits set
+#
+#   IRQ 22  piodma
 # status of mailbox interrupts shows up at 0x2c and is cleared there
 # irqs are masked in 0x10
 # 0x00000000    sz 0x10000      code ram (writable)
