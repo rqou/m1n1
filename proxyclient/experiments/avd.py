@@ -466,6 +466,62 @@ def m3_reboot():
     p.write32(cm3_ctrl_base + 0x08, 0xe)
     p.write32(cm3_ctrl_base + 0x08, 1)
 
+
+
+# need dart for piodma
+dart = DART8110.from_adt(u, f'/arm-io/dart-avd0')
+dart.initialize()
+# dart.regs.TCR[15].val = 0x2
+# dart.regs.TTBR[15].val = 0x200000
+
+
+
+def divroundup(val, div):
+    return (val + div - 1) // div
+
+def pack_words(words):
+    output = b''
+    for word in words:
+        output += struct.pack("<I", word)
+    return output
+
+piodma_commands = pack_words([
+    (2 << 18) | 0 | 1,
+    0xcafebabe,
+    0xfeedf00d,
+    0xb00b1e5,
+    0,
+])
+
+piodma_sz = divroundup(len(piodma_commands), 0x4000)
+piodma_commands = piodma_commands + b'\x00' * (piodma_sz - len(piodma_commands))
+
+piodma_buf_phys = u.heap.memalign(0x4000, piodma_sz)
+iface.writemem(piodma_buf_phys, piodma_commands)
+piodma_buf_iova = dart.iomap(1, piodma_buf_phys, piodma_sz)
+print(f"PIODMA buffer @ phys {piodma_buf_phys:016X} iova {piodma_buf_iova:016X}")
+
+p.write32(piodma_base + 0x54, 0x7)
+p.write32(piodma_base + 0x4, 0xffffffff)
+p.write32(piodma_base + 0x4c, piodma_buf_iova & 0xffffffff)
+p.write32(piodma_base + 0x50, (piodma_buf_iova >> 32) & 0xffffffff)
+
+
+p.write32(cm3_data_base + 0x1000, 0xaaaaaaaa)
+p.write32(cm3_data_base + 0x1004, 0xaaaaaaaa)
+p.write32(cm3_data_base + 0x1008, 0xaaaaaaaa)
+p.write32(cm3_data_base + 0x100c, 0xaaaaaaaa)
+p.write32(piodma_base + 0x24, 0x28709100)
+p.write32(piodma_base + 0x54, 0x411)
+print(hex(p.read32(cm3_data_base + 0x1000)))
+print(hex(p.read32(cm3_data_base + 0x1004)))
+print(hex(p.read32(cm3_data_base + 0x1008)))
+print(hex(p.read32(cm3_data_base + 0x100c)))
+print(hex(p.read32(piodma_base + 0x4)))
+print(hex(p.read32(piodma_base + 0xc)))
+# why is status 0x41 after this?
+
+
 # notes on M3-side hardware
 # 206 IRQs set up
 #   IRQ 0   mbox 0 empty
@@ -502,9 +558,8 @@ def m3_reboot():
 # 1014          0x7c bit 22     mbox 3 (both empty and data)
 # 1015          0x7c bit 23     flags 0
 # 1016          0x7c bit 24     flags 1
-
-# ? 1017        0x7c bit 25
-# 1018  DART    0x7c bit 26
+# 1017          0x7c bit 25     PIODMA
+# 1018          0x7c bit 26     DART
 # ? 1019        0x7c bit 27
 # ? 1020        0x7c bit 28
 # ? 1021        0x7c bit 29

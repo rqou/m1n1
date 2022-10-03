@@ -19,15 +19,91 @@ class AVDThing102Regs(RegMap):
 
 
 class AVDPIODMARegs(RegMap):
-    APIODMA_CFG                         = 0x00, Register32
+    # bit1 = ???
+    # bit0 = ???
+    CFG                                 = 0x00, Register32
+    # TO BE CONFIRMED, FROM SCALER RE
+        # 4 = address bounds error
+    # 3 = AXI bus error
+    # 2 = sequence fifo overflow
+    # 1 = command parse error
+    # 0 = done
+    IRQ_STATUS                          = 0x04, Register32
+    # max 0x3ff, higher bits unclear
+        # 4 = address bounds error
+    # 3 = AXI bus error
+    # 2 = sequence fifo overflow
+    # 1 = command parse error
+    # 0 = done
+    IRQ_ENABLE                          = 0x08, Register32
+    # 31 = busy
+    # [20:16] = commands completed
+    # [5:0] = free command count
+    STATUS                              = 0x0c, Register32
+    # Tunables of some kind
+    DMACFGMEMSRC                        = 0x10, Register32
+    DMACFGMEMDAT                        = 0x14, Register32
+    DMACFGMEMDST                        = 0x18, Register32
+    DMACFGPIORD                         = 0x1c, Register32
+    DMACFGPIOWR                         = 0x20, Register32
+    # TO BE CONFIRMED, FROM SCALER RE
+    BASE_ADDR_LO                        = irange(0x24, 8, 4), Register32
 
-    APIODMA_DMACFGMEMSRC                = 0x10, Register32
-    APIODMA_DMACFGMEMDAT                = 0x14, Register32
-    APIODMA_DMACFGMEMDST                = 0x18, Register32
-    APIODMA_DMACFGPIORD                 = 0x1c, Register32
-    APIODMA_DMACFGPIOWR                 = 0x20, Register32
-    INIT_AVD_WRAP_THING                 = 0x24, Register32
+    # 0x44
+    # 0xffffffff
+    # 0x48
+    # 0x3ff
 
+    SRC_ADDR_LO                         = 0x4c, Register32
+    SRC_ADDR_HI                         = 0x50, Register32
+    # 0xffffff7e
+    # 0x11  = normal
+    # 0x19  = scaler sometimes uses
+    # 0x07  = cancel
+    COMMAND                             = 0x54, Register32
+
+    # regs here not writable, all 0 on start
+
+    # XXX are these only valid on faults?
+    MEM_RD_ADDR_LO                      = 0x90, Register32
+    MEM_RD_ADDR_HI                      = 0x94, Register32
+    MEM_WR_ADDR_LO                      = 0x98, Register32
+    MEM_WR_ADDR_HI                      = 0x9c, Register32
+    PIO_RD_ADDR_LO                      = 0x90, Register32
+    PIO_RD_ADDR_HI                      = 0x94, Register32
+    PIO_WR_ADDR_LO                      = 0x98, Register32
+    PIO_WR_ADDR_HI                      = 0x9c, Register32
+    # [0xb0] = mem counts
+    #     [31:16] = memWCnt
+    #     [15:0] = memRCnt
+
+    HW_VERSION                          = 0xb4, Register32
+
+    # another block of not writable, all 0 on start
+
+    # TO BE CONFIRMED, FROM SCALER RE
+    #     31 = ErrPIOWr
+    #     30 = ErrPIORd
+    #     29 = ErrMemWr
+    # 28 = ErrMemRd
+    #     [15:0] = parse count
+    ERROR_STATUS                        = 0xc4, Register32
+
+    # 0xd0
+    # 0xc0000002
+    # 0xd4
+    # 0xffffffff
+    # 0xd8
+    # 0xffffff
+    # 0xdc
+    # 0xffffffff
+    # 0xe0
+    # 0xff
+    # 0xe4
+    # 0xffff
+
+    # TO BE CONFIRMED, FROM SCALER RE
+    BASE_ADDR_HI                        = irange(0xf0, 8, 4), Register32
 
 class R_CM3_IRQ(Register32):
     MBOX0_EMPTY     = 0
@@ -417,7 +493,10 @@ class AVDDMAThingyRegs(RegMap):
 
 
 class AVDWrapCtrlRegs(RegMap):
-    DMA_IRQ_THING                       = 0x04, Register32
+    # probably two bits???
+    # probably corresponds to irq14/15
+    DMA_IRQ_ENABLE                      = 0x00, Register32
+    DMA_IRQ_STATUS_CLR                  = 0x04, Register32
 
     IDLE_THING                          = 0x14, Register32
     AVDCTRL_CLOCKGATEENABLE             = 0x18, Register32

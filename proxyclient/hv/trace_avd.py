@@ -5,6 +5,13 @@ from m1n1.utils import *
 import struct
 
 
+def read_by_32(addr, len_):
+    data = b''
+    for i in range(0, len_, 4):
+        data += struct.pack("<I", p.read32(addr + i))
+    return data
+
+
 class AVDTracer(Tracer):
     DEFAULT_MODE = TraceMode.SYNC
 
@@ -15,6 +22,7 @@ class AVDTracer(Tracer):
 
     def start(self):
         avd_base, _ = self.dev.get_reg(0)
+        self.avd_base = avd_base
         self.trace_regmap(avd_base + 0x000_0000, 0x4000, AVDThing0_0000Regs, name="Thing_0x000_0000", prefix="Thing_0x000_0000")
         self.trace_regmap(avd_base + 0x000_8000, 0x4000, AVDThing0_8000Regs, name="Thing_0x000_8000", prefix="Thing_0x000_8000")
         self.trace_regmap(avd_base + 0x100_0000, 0x4000, AVDThing100Regs, name="Thing_0x100_0000", prefix="Thing_0x100_0000")
@@ -28,9 +36,25 @@ class AVDTracer(Tracer):
         self.trace_regmap(avd_base + 0x140_0000, 0x4000, AVDWrapCtrlRegs, name="WRAP_CTRL", prefix="WRAP_CTRL")
         self.dart_tracer.start()
 
-    def w_CM3Ctrl_START_RELATED_THING(self, val):
-        print(val)
-        self.dart_tracer.dart.dump_all()
+    # def w_CM3Ctrl_START_RELATED_THING(self, val):
+    #     print(val)
+    #     self.dart_tracer.dart.dump_all()
+
+    def w_CM3Ctrl_MAILBOX0_SUBMIT(self, val):
+        # print("w", val)
+        val = int(val)
+        print("~~~~~ SUBMIT COMMAND @ {val:08X} ~~~~~")
+        if val >= 0x109_0000 and val < 0x10a_0000:
+            data = read_by_32(self.avd_base + val, 0x60)
+            chexdump(data)
+
+    def r_CM3Ctrl_MAILBOX1_RETRIEVE(self, val):
+        # print("r", val)
+        val = int(val)
+        print("~~~~~ READ REPLY @ {val:08X} ~~~~~")
+        if val >= 0x109_0000 and val < 0x10a_0000:
+            data = read_by_32(self.avd_base + val, 0x60)
+            chexdump(data)
 
 AVDTracer = AVDTracer._reloadcls()
 
