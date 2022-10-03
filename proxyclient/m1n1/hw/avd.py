@@ -19,8 +19,7 @@ class AVDThing102Regs(RegMap):
 
 
 class R_PIODMA_CFG(Register32):
-    # this might be "halt" according to scaler RE
-    _BIT0       = 0
+    PAUSE       = 0
     # dunno, but this is set on reset
     _BIT1       = 1
 
@@ -50,8 +49,10 @@ class R_PIODMA_STATUS(Register32):
 
 
 class R_PIODMA_COMMAND(Register32):
+    # bit0 = go?
     # 7 = cancel
     # 0x11 = normal
+    # 0x13 = pio read error (so, the other way around?)
     # 0x19 = different
     CMD                     = 7, 0
     COUNT                   = 30, 8

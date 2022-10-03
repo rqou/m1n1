@@ -488,8 +488,10 @@ def pack_words(words):
     return output
 
 piodma_commands = pack_words([
-    int(PIODMA_PACKET_LINK(MUST_BE_ONE=3, COUNT=5)),
-    0x80000008,
+    int(PIODMA_PACKET_WRITE(INCREMENT=1, ADDR=0, COUNT_MINUS_ONE=0, BASE_ADDR_REG=0)),
+    0xcafebabe,
+    # int(PIODMA_PACKET_LINK(MUST_BE_ONE=3, COUNT=5)),
+    # 0x80000008,
 
     int(PIODMA_PACKET_WRITE(INCREMENT=1, ADDR=0, COUNT_MINUS_ONE=0, BASE_ADDR_REG=3)),
     0xcafebabe,
@@ -498,7 +500,7 @@ piodma_commands = pack_words([
     0xb00b1e5,
 ])
 
-piodma_sz = divroundup(len(piodma_commands), 0x4000)
+piodma_sz = divroundup(len(piodma_commands), 0x4000) * 0x4000
 piodma_commands = piodma_commands + b'\x00' * (piodma_sz - len(piodma_commands))
 
 piodma_buf_phys = u.heap.memalign(0x4000, piodma_sz)
@@ -529,7 +531,12 @@ piodma.BASE_ADDR_LO[5].val = 0xaaaaaaaa
 piodma.BASE_ADDR_LO[6].val = 0xaaaaaaaa
 piodma.BASE_ADDR_LO[7].val = 0xaaaaaaaa
 
-piodma.COMMAND = R_PIODMA_COMMAND(CMD=0x11, COUNT=2)
+p.write32(piodma_base + 0x44, (piodma_buf_iova + 0x1000) & 0xffffffff)
+
+print("before", hex(p.read32(piodma_buf_phys + 0x1000)))
+print("before", hex(p.read32(piodma_buf_phys + 0x1004)))
+
+piodma.COMMAND = R_PIODMA_COMMAND(CMD=0x13, COUNT=2)
 
 print(hex(p.read32(cm3_data_base + 0x1000)))
 print(hex(p.read32(cm3_data_base + 0x1004)))
@@ -539,6 +546,9 @@ print(hex(p.read32(cm3_data_base + 0x2000)))
 print(hex(p.read32(cm3_data_base + 0x2004)))
 print(hex(p.read32(cm3_data_base + 0x2008)))
 print(hex(p.read32(cm3_data_base + 0x200c)))
+
+print("after", hex(p.read32(piodma_buf_phys + 0x1000)))
+print("after", hex(p.read32(piodma_buf_phys + 0x1004)))
 
 print(piodma.IRQ_STATUS)
 print(piodma.STATUS)
