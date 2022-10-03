@@ -54,7 +54,7 @@ class R_PIODMA_COMMAND(Register32):
     # bit2-1 cmd
     #  00 = write
     #  01 = read
-    #  10 = ????
+    #  10 = ????, but it writes to the destination
     #  11 = cancel
     # bit3 = do something different
     # 7 = cancel
