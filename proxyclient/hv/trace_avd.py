@@ -19,6 +19,7 @@ class AVDTracer(Tracer):
         super().__init__(hv, verbose=verbose, ident=type(self).__name__ + "@" + devpath)
         self.dev = hv.adt[devpath]
         self.dart_tracer = dart_tracer
+        self._dump_idx = 0
 
     def start(self):
         avd_base, _ = self.dev.get_reg(0)
@@ -36,22 +37,37 @@ class AVDTracer(Tracer):
         self.trace_regmap(avd_base + 0x140_0000, 0x4000, AVDWrapCtrlRegs, name="WRAP_CTRL", prefix="WRAP_CTRL")
         self.dart_tracer.start()
 
-    # def w_CM3Ctrl_START_RELATED_THING(self, val):
-    #     print(val)
-    #     self.dart_tracer.dart.dump_all()
-
     def w_CM3Ctrl_MAILBOX0_SUBMIT(self, val):
         # print("w", val)
         val = int(val)
-        print("~~~~~ SUBMIT COMMAND @ {val:08X} ~~~~~")
+        print(f"~~~~~ SUBMIT COMMAND @ {val:08X} ~~~~~")
         if val >= 0x109_0000 and val < 0x10a_0000:
             data = read_by_32(self.avd_base + val, 0x60)
             chexdump(data)
 
+            if data[0] & 0x1f == 1:
+                print("DECODE COMMAND!")
+                dump_idx = self._dump_idx
+                self._dump_idx += 1
+                with open(f'_avd_dump_cmd_{dump_idx}.bin', 'wb') as f:
+                    f.write(data)
+                self.dart_tracer.dart.dump_all()
+                # fixme: ignore high
+                frame_params_iova_lo = struct.unpack("<I", data[8:12])[0]
+                print(f"frame params @ {frame_params_iova_lo:08x}")
+
+                try:
+                    frame_params = self.dart_tracer.dart.ioread(1, frame_params_iova_lo, 0xb7504)
+                    with open(f'_avd_dump_frame_params_{dump_idx}.bin', 'wb') as f:
+                        f.write(frame_params)
+                    chexdump(frame_params)
+                except Exception as e:
+                    print(e)
+
     def r_CM3Ctrl_MAILBOX1_RETRIEVE(self, val):
         # print("r", val)
         val = int(val)
-        print("~~~~~ READ REPLY @ {val:08X} ~~~~~")
+        print(f"~~~~~ READ REPLY @ {val:08X} ~~~~~")
         if val >= 0x109_0000 and val < 0x10a_0000:
             data = read_by_32(self.avd_base + val, 0x60)
             chexdump(data)

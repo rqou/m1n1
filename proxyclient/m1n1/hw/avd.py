@@ -63,7 +63,7 @@ class R_PIODMA_COMMAND(Register32):
     # 0x19 = different
     # bit4 = make r/w work
     CMD                     = 7, 0
-    COUNT                   = 30, 8
+    COUNT                   = 29, 8
 
 
 class R_PIODMA_ERROR_STATUS(Register32):
